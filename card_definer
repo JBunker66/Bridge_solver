@@ -1,0 +1,50 @@
+import numpy as np
+
+class Card:
+
+    def __init__(self,number,suit):
+        
+        # Defines the input suit and card as values that can be more easly delt with
+        self.suits = ['C','D','H','S','NT']
+        self.cards = ['2','3','4','5','6','7','8','9','10','J','Q','K','A']
+        for i,j in enumerate(self.suits):
+            if suit == j:
+                self.Suit = i
+        for i,j in enumerate(self.cards):
+            if number == j:
+                self.Number = i
+        # Defult to NT
+        self.Trump = 4
+
+    def Set_Trump(self,trump):
+        # Number of trump represents place in suit list 
+        for i,j in enumerate(self.suits):
+            if trump == j:
+                self.Trump = i
+    
+    def __gt__(self, other_card):
+        # Redifines the > symbol to say which card would 'win' 
+        if self.Suit == other_card.Suit:
+            if self.Number > other_card.Number:
+                return True
+            else:
+                return False
+        elif other_card.Suit == self.Trump:
+            return False
+        else:
+            return True
+    def __str__(self):
+        return 'The {} of {}'.format(self.cards[self.Number],self.suits[self.Suit])        
+
+def Convert_Hand(hand):
+    # Converts a list of tuples to a list of cards
+    Output_Hand = []
+    Spades = []
+    Hearts = []
+    Dimonds = []
+    Clubs = []
+    for card in hand:
+        card_info = [char for char in card]
+        card = Card(card_info[0],card_info[1])
+        Output_Hand.append(card)
+    return np.array(Output_Hand)
