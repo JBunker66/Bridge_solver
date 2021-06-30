@@ -43,8 +43,25 @@ def Convert_Hand(hand):
     Hearts = []
     Dimonds = []
     Clubs = []
+    Suits = [Clubs,Dimonds,Hearts,Spades]
+    counter = 1
+    # Sorts the hand card types and also into lists of the differnt suits for sorting
     for card in hand:
         card_info = [char for char in card]
         card = Card(card_info[0],card_info[1])
-        Output_Hand.append(card)
-    return np.array(Output_Hand)
+        Suits[card.Suit].append(card)
+    # Suits the suits into card oder
+    for suit in Suits:
+        suit.sort(key=lambda x: x.Number)
+
+    # combines adjacent cards into the same value as functionaly equivilent and combines the suits to one hand
+    for suit in Suits:
+        length = len(suit)-1
+        for i,card in enumerate(suit):
+            if i == length or card.Number + 1 != suit[i+1].Number:
+                Output_Hand.append((card,counter))
+                counter = 1
+            else:
+                counter +=1    
+    return Output_Hand
+
