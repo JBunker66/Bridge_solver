@@ -1,0 +1,99 @@
+from card_definer import Card
+from card_definer import Convert_Hand
+import numpy as np
+
+def card_remover(hand,tracker):
+    if hand[tracker][1] == 0:
+        del hand[tracker]
+    else:
+        hand[tracker][1] -= 1
+
+def card_selector(hand1_card,hand_for_selection,hand_tracker):
+    # selects a card for 2-4th hand given an 1st hand card
+    CARD_SELECTED = False
+    card2 = False
+    if can_follow_suit(hand_for_selection,hand1_card.Suit):
+        if hand2[hand_tracker][0].Suit == hand1_card.Suit:
+            card2 = hand2[hand_tracker][0]
+            CARD_SELECTED = True
+        else:
+            hand_tracker += 1
+    else:
+        card2 = hand2[hand_tracker][0]
+        CARD_SELECTED = True
+    return [CARD_SELECTED,card2,hand_tracker]
+
+def hand_player(card1,card2,card3,card4):
+    # simulates a round for input cards
+    if card1 > card2 and card1 > card3 and card1> card4:
+        return 0
+    elif card2 > card3 and card2 > card4:
+        return 1
+    elif card3 > card4:
+        return 2
+    else:
+        return 3
+
+def trump_setter(hand,trump):
+    # sets a trump value for all the hands
+    for i,card in enumerate(hand):
+        card.Trump(trump)
+        hand[i] = card
+    return hand
+
+def can_follow_suit(hand,suit):
+    # checks if can follow suit
+    suits = ['C','D','H','S']
+    for i,j in enumerate(suits):
+            if suit == j:
+                suit = i
+    for card in hand:
+        if card.Suit == suit:
+            return True
+    return False
+
+
+hand1 = ['AC','5D','4H']
+hand2 = ['AS','6D','2S']
+hand3 = ['JH','JC','JD']
+hand4 = ['2S','3S','4S']
+
+    
+def round_solver(hand1,hand2,hand3,hand4,losses=0,hand1_tracker=0,hand2_tracker=0,hand3_tracker=0,hand4_tracker=0):
+    # assume hand 1 is partnered with hand 3 and 2 with 4
+    # the hands are converted into np.lists of touples of (card, number of equivilent cards
+    
+    # could make a trump input - trivial
+
+    # maby useful defined terms
+    ROUND = 1
+    # need to set up corect loops
+    
+    # selects the top cards which can follow suit or the top card if suit cannot be followed
+    card1 = hand1[hand1_tracker][0]
+    hand1 = card_remover(hand1,hand1_tracker)
+    while ROUND == 1:
+        card2_selected, card2, hand2_tracker = card_selector(card1,hand2,hand2_tracker)
+        if not card2_selected:
+            # skips if card not selected
+            continue
+        # removes the selected card from the hand
+        hand2 = card_remover(hand2,hand2_tracker)
+    while ROUND == 1:
+        card3_selected, card3, hand3_tracker = card_selector(card1,hand3,hand3_tracker)
+        if not card3_selected:
+            continue
+        hand3 = card_remover(hand3,hand3_tracker)
+    while ROUND == 1:
+        card4_selected, card4, hand4_tracker = card_selector(card1,hand4,hand4_tracker)
+        if not card4_selected:
+            continue
+        hand4 = card_remover(hand4,hand4_tracker)
+        # First round of cards selected
+        Round1_winner = hand_player(card1,card2,card3,card4)
+        if Round1_winner == 1 or Round1_winner == 3:
+            losses += 1
+        return(hand1,hand2,hand3,hand4,losses)
+             
+def double_dummy(hand1,hand2,hand3,hand4):
+    pass        
