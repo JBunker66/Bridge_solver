@@ -10,18 +10,23 @@ def card_remover(hand,tracker):
 
 def card_selector(hand1_card,hand_for_selection,hand_tracker):
     # selects a card for 2-4th hand given an 1st hand card
+    # so it is defined in output even if not selected
     CARD_SELECTED = False
     card2 = False
+    END_OF_ITTERATIONS = False
     if can_follow_suit(hand_for_selection,hand1_card.Suit):
-        if hand2[hand_tracker][0].Suit == hand1_card.Suit:
-            card2 = hand2[hand_tracker][0]
+        if hand_for_selection[hand_tracker][0].Suit == hand1_card.Suit:
+            card2 = hand_for_selection[hand_tracker][0]
             CARD_SELECTED = True
         else:
             hand_tracker += 1
+    elif hand_tracker == len(hand_for_selection):
+        END_OF_ITTERATIONS = True
+        card_selector(hand1_card,hand_for_selection,0)
     else:
-        card2 = hand2[hand_tracker][0]
+        card2 = hand_for_selection[hand_tracker][0]
         CARD_SELECTED = True
-    return [CARD_SELECTED,card2,hand_tracker]
+    return CARD_SELECTED,card2,hand_tracker, END_OF_ITTERATIONS
 
 def hand_player(card1,card2,card3,card4):
     # simulates a round for input cards
@@ -53,10 +58,6 @@ def can_follow_suit(hand,suit):
     return False
 
 
-hand1 = ['AC','5D','4H']
-hand2 = ['AS','6D','2S']
-hand3 = ['JH','JC','JD']
-hand4 = ['2S','3S','4S']
 
     
 def round_solver(hand1,hand2,hand3,hand4,losses=0,hand1_tracker=0,hand2_tracker=0,hand3_tracker=0,hand4_tracker=0):
@@ -66,34 +67,48 @@ def round_solver(hand1,hand2,hand3,hand4,losses=0,hand1_tracker=0,hand2_tracker=
     # could make a trump input - trivial
 
     # maby useful defined terms
-    ROUND = 1
+    ROUND = 3
     # need to set up corect loops
     
     # selects the top cards which can follow suit or the top card if suit cannot be followed
     card1 = hand1[hand1_tracker][0]
     hand1 = card_remover(hand1,hand1_tracker)
+    # after fist selection the resonces are changed 4th-2nd so third loops first
+    while ROUND == 3:
+        card4_selected, card4, hand4_tracker, hand4_complete = card_selector(card1,hand4,hand4_tracker)
+        if not card4_selected:
+            continue
+        if hand4_complete:
+            hand3_tracker += 1
+        hand4 = card_remover(hand4,hand4_tracker)
+        ROUND = 2
+    while ROUND == 2:
+        card3_selected, card3, hand3_tracker,hand3_complete = card_selector(card1,hand3,hand3_tracker)
+        if not card3_selected:
+            continue
+        # moves the iteration on if hand before done all options
+        if hand3_complete:
+            hand2_tracker += 1
+        hand3 = card_remover(hand3,hand3_tracker)
+        ROUND = 1
     while ROUND == 1:
-        card2_selected, card2, hand2_tracker = card_selector(card1,hand2,hand2_tracker)
+        card2_selected, card2, hand2_tracker,iteration_complete = card_selector(card1,hand2,hand2_tracker)
         if not card2_selected:
             # skips if card not selected
             continue
         # removes the selected card from the hand
         hand2 = card_remover(hand2,hand2_tracker)
-    while ROUND == 1:
-        card3_selected, card3, hand3_tracker = card_selector(card1,hand3,hand3_tracker)
-        if not card3_selected:
-            continue
-        hand3 = card_remover(hand3,hand3_tracker)
-    while ROUND == 1:
-        card4_selected, card4, hand4_tracker = card_selector(card1,hand4,hand4_tracker)
-        if not card4_selected:
-            continue
-        hand4 = card_remover(hand4,hand4_tracker)
+
         # First round of cards selected
         Round1_winner = hand_player(card1,card2,card3,card4)
         if Round1_winner == 1 or Round1_winner == 3:
             losses += 1
-        return(hand1,hand2,hand3,hand4,losses)
+        return(hand1,hand2,hand3,hand4,losses,hand1_tracker,hand2_tracker,hand3_tracker,hand4_tracker,iteration_complete)
              
 def double_dummy(hand1,hand2,hand3,hand4):
-    pass        
+    pass
+
+hand1 = ['AC','5D','4H']
+hand2 = ['AS','6D','2S']
+hand3 = ['JH','JC','JD']
+hand4 = ['5S','3S','4S']
